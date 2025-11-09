@@ -6,28 +6,35 @@ import HumptyDumptyList from './components/HumptyDumptyList';
 import HumptyDumptyForm from './components/HumptyDumptyForm';
 import DowntonList from './components/DowntonList';
 import DowntonForm from './components/DowntonForm';
+import GlasgowPediatricList from './components/GlasgowPediatricList';
+import GlasgowPediatricForm from './components/GlasgowPediatricForm';
 import type { BarthelRecord } from './types/barthel';
 import type { HumptyDumptyRecord } from './types/humptyDumpty';
 import { DowntonRecord } from './types/downton';
+import { GlasgowPediatricRecord } from './types/glasgowPediatric';
 import { mockBarthelRecords } from './data/barthelData';
 import { mockHumptyDumptyRecords } from './data/humptyDumptyData';
 import { mockDowntonRecords } from './data/downtonData';
+import { mockGlasgowPediatricRecords } from './data/glasgowPediatricData';
 import { Tooltip } from 'react-tooltip';
 import LineChartIcon from './components/icons/LineChartIcon';
 
-type TabType = 'barthel' | 'humptyDumpty' | 'downton';
+type TabType = 'barthel' | 'humptyDumpty' | 'downton' | 'glasgowPediatric';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('barthel');
   const [barthelRecords, setBarthelRecords] = useState<BarthelRecord[]>([]);
   const [humptyDumptyRecords, setHumptyDumptyRecords] = useState<HumptyDumptyRecord[]>([]);
   const [downtonRecords, setDowntonRecords] = useState<DowntonRecord[]>([]);
+  const [glasgowPediatricRecords, setGlasgowPediatricRecords] = useState<GlasgowPediatricRecord[]>([]);
   const [editingBarthelRecord, setEditingBarthelRecord] = useState<BarthelRecord | undefined>(undefined);
   const [editingHumptyDumptyRecord, setEditingHumptyDumptyRecord] = useState<HumptyDumptyRecord | undefined>(undefined);
   const [editingDowntonRecord, setEditingDowntonRecord] = useState<DowntonRecord | undefined>(undefined);
+  const [editingGlasgowPediatricRecord, setEditingGlasgowPediatricRecord] = useState<GlasgowPediatricRecord | undefined>(undefined);
   const [isBarthelFormVisible, setIsBarthelFormVisible] = useState(false);
   const [isHumptyDumptyFormVisible, setIsHumptyDumptyFormVisible] = useState(false);
   const [isDowntonFormVisible, setIsDowntonFormVisible] = useState(false);
+  const [isGlasgowPediatricFormVisible, setIsGlasgowPediatricFormVisible] = useState(false);
 
   // Cargar registros del localStorage al iniciar
   useEffect(() => {
@@ -60,6 +67,16 @@ function App() {
       setDowntonRecords(mockDowntonRecords);
       localStorage.setItem('downtonRecords', JSON.stringify(mockDowntonRecords));
     }
+
+    // Cargar registros de Glasgow Pediátrica
+    const savedGlasgowPediatricRecords = localStorage.getItem('glasgowPediatricRecords');
+    if (savedGlasgowPediatricRecords) {
+      setGlasgowPediatricRecords(JSON.parse(savedGlasgowPediatricRecords));
+    } else {
+      // Si no hay registros guardados, usar los de ejemplo
+      setGlasgowPediatricRecords(mockGlasgowPediatricRecords);
+      localStorage.setItem('glasgowPediatricRecords', JSON.stringify(mockGlasgowPediatricRecords));
+    }
   }, []);
 
   // Guardar registros en localStorage cuando cambien
@@ -80,6 +97,12 @@ function App() {
       localStorage.setItem('downtonRecords', JSON.stringify(downtonRecords));
     }
   }, [downtonRecords]);
+
+  useEffect(() => {
+    if (glasgowPediatricRecords.length > 0) {
+      localStorage.setItem('glasgowPediatricRecords', JSON.stringify(glasgowPediatricRecords));
+    }
+  }, [glasgowPediatricRecords]);
 
   // Manejadores para Barthel
   const handleEditBarthelRecord = (record: BarthelRecord) => {
@@ -165,6 +188,34 @@ function App() {
     setEditingDowntonRecord(undefined);
   };
 
+  // Manejadores para Glasgow Pediátrica
+  const handleEditGlasgowPediatricRecord = (record: GlasgowPediatricRecord) => {
+    setEditingGlasgowPediatricRecord(record);
+    setIsGlasgowPediatricFormVisible(true);
+  };
+
+  const handleNewGlasgowPediatricRecord = () => {
+    setEditingGlasgowPediatricRecord(undefined);
+    setIsGlasgowPediatricFormVisible(true);
+  };
+
+  const handleSaveGlasgowPediatricRecord = (record: GlasgowPediatricRecord) => {
+    if (editingGlasgowPediatricRecord) {
+      // Actualizar registro existente
+      setGlasgowPediatricRecords(records => records.map(r => r.id === record.id ? record : r));
+    } else {
+      // Añadir nuevo registro
+      setGlasgowPediatricRecords(records => [record, ...records]);
+    }
+    setIsGlasgowPediatricFormVisible(false);
+    setEditingGlasgowPediatricRecord(undefined);
+  };
+
+  const handleCancelGlasgowPediatricForm = () => {
+    setIsGlasgowPediatricFormVisible(false);
+    setEditingGlasgowPediatricRecord(undefined);
+  };
+
   return (
     <div className="app-container">
        <div className="bg-white p-4 border-b flex items-center">
@@ -208,23 +259,29 @@ function App() {
         </div>
      
       <div className="tabs">
-        <div 
+        <div
           className={`tab ${activeTab === 'barthel' ? 'active' : ''}`}
           onClick={() => setActiveTab('barthel')}
         >
           Índice de Barthel
         </div>
-        <div 
+        <div
           className={`tab ${activeTab === 'humptyDumpty' ? 'active' : ''}`}
           onClick={() => setActiveTab('humptyDumpty')}
         >
           Escala Humpty-Dumpty
         </div>
-        <div 
+        <div
           className={`tab ${activeTab === 'downton' ? 'active' : ''}`}
           onClick={() => setActiveTab('downton')}
         >
           Escala J.H. Downton
+        </div>
+        <div
+          className={`tab ${activeTab === 'glasgowPediatric' ? 'active' : ''}`}
+          onClick={() => setActiveTab('glasgowPediatric')}
+        >
+          Escala de Glasgow Pediátrica
         </div>
       </div>
       
@@ -290,18 +347,44 @@ function App() {
                 Nuevo Registro
               </button>
             </div>
-            <DowntonList 
-              records={downtonRecords} 
-              onEditRecord={handleEditDowntonRecord} 
+            <DowntonList
+              records={downtonRecords}
+              onEditRecord={handleEditDowntonRecord}
             />
           </div>
-          
+
           {isDowntonFormVisible && (
             <div className="form-section">
-              <DowntonForm 
-                initialRecord={editingDowntonRecord} 
-                onSave={handleSaveDowntonRecord} 
-                onCancel={handleCancelDowntonForm} 
+              <DowntonForm
+                initialRecord={editingDowntonRecord}
+                onSave={handleSaveDowntonRecord}
+                onCancel={handleCancelDowntonForm}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Contenido de la pestaña Glasgow Pediátrica */}
+        <div className={`tab-content ${activeTab === 'glasgowPediatric' ? 'active' : ''}`}>
+          <div className="records-section">
+            <div className="section-header">
+              <h2>Historial de Registros de Glasgow Pediátrica (Escala de Coma)</h2>
+              <button className="new-record-button" onClick={handleNewGlasgowPediatricRecord}>
+                Nuevo Registro
+              </button>
+            </div>
+            <GlasgowPediatricList
+              records={glasgowPediatricRecords}
+              onEditRecord={handleEditGlasgowPediatricRecord}
+            />
+          </div>
+
+          {isGlasgowPediatricFormVisible && (
+            <div className="form-section">
+              <GlasgowPediatricForm
+                initialRecord={editingGlasgowPediatricRecord}
+                onSave={handleSaveGlasgowPediatricRecord}
+                onCancel={handleCancelGlasgowPediatricForm}
               />
             </div>
           )}
