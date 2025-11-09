@@ -1,31 +1,33 @@
-import { useState, useEffect } from 'react';
 import './App.css';
-import BarthelList from './components/BarthelList';
+
+import { useEffect, useState } from 'react';
+
 import BarthelForm from './components/BarthelForm';
-import HumptyDumptyList from './components/HumptyDumptyList';
-import HumptyDumptyForm from './components/HumptyDumptyForm';
-import DowntonList from './components/DowntonList';
-import DowntonForm from './components/DowntonForm';
-import GlasgowPediatricList from './components/GlasgowPediatricList';
-import GlasgowPediatricForm from './components/GlasgowPediatricForm';
-import NutritionalRiskList from './components/NutritionalRiskList';
-import NutritionalRiskForm from './components/NutritionalRiskForm';
-import PercentileList from './components/PercentileList';
-import PercentileForm from './components/PercentileForm';
+import BarthelList from './components/BarthelList';
 import type { BarthelRecord } from './types/barthel';
-import type { HumptyDumptyRecord } from './types/humptyDumpty';
+import DowntonForm from './components/DowntonForm';
+import DowntonList from './components/DowntonList';
 import { DowntonRecord } from './types/downton';
+import GlasgowPediatricForm from './components/GlasgowPediatricForm';
+import GlasgowPediatricList from './components/GlasgowPediatricList';
 import { GlasgowPediatricRecord } from './types/glasgowPediatric';
+import HumptyDumptyForm from './components/HumptyDumptyForm';
+import HumptyDumptyList from './components/HumptyDumptyList';
+import type { HumptyDumptyRecord } from './types/humptyDumpty';
+import LineChartIcon from './components/icons/LineChartIcon';
+import NutritionalRiskForm from './components/NutritionalRiskForm';
+import NutritionalRiskList from './components/NutritionalRiskList';
 import { NutritionalRiskRecord } from './types/nutritionalRisk';
+import PercentileForm from './components/PercentileForm';
+import PercentileList from './components/PercentileList';
 import { PercentileRecord } from './types/percentiles';
+import { Tooltip } from 'react-tooltip';
 import { mockBarthelRecords } from './data/barthelData';
-import { mockHumptyDumptyRecords } from './data/humptyDumptyData';
 import { mockDowntonRecords } from './data/downtonData';
 import { mockGlasgowPediatricRecords } from './data/glasgowPediatricData';
+import { mockHumptyDumptyRecords } from './data/humptyDumptyData';
 import { mockNutritionalRiskRecords } from './data/nutritionalRiskData';
 import { mockPercentileRecords } from './data/percentilesData';
-import { Tooltip } from 'react-tooltip';
-import LineChartIcon from './components/icons/LineChartIcon';
 
 type TabType = 'barthel' | 'humptyDumpty' | 'downton' | 'glasgowPediatric' | 'nutritionalRisk' | 'percentiles';
 

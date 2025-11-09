@@ -488,3 +488,111 @@ main {
   font-size: 0.9em;
   color: #333;
 }
+
+/* Estilos para la lista de percentiles */
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.record-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e1e1e1;
+}
+
+.record-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.record-date {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1.1em;
+}
+
+.record-professional {
+  color: #5a6c7d;
+  font-size: 0.9em;
+}
+
+.record-content {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.record-section {
+  flex: 1;
+  min-width: 0; /* Permite que el contenido se ajuste */
+}
+
+.record-section h4 {
+  margin: 0 0 10px 0;
+  color: #3498db;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.record-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #555;
+  min-width: 60px;
+}
+
+.detail-value {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.no-records {
+  background-color: white;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #5a6c7d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.no-records p {
+  margin: 0;
+  font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+  .record-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .record-card {
+    padding: 15px;
+  }
+}

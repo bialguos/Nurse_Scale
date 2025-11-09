@@ -34,7 +34,7 @@ const PercentileForm = ({ initialRecord, onSave, onCancel }: PercentileFormProps
     percentileDifference: 0,
   });
 
-  const [showCharts, setShowCharts] = useState(false);
+  const [showCharts, setShowCharts] = useState(true);
 
   useEffect(() => {
     if (initialRecord) {

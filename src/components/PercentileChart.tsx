@@ -1,13 +1,13 @@
 import {
+  CartesianGrid,
+  ComposedChart,
+  Legend,
   Line,
+  ReferenceDot,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ComposedChart,
-  ReferenceDot,
 } from 'recharts';
 import { generateChartData, monthsToAge } from '../utils/percentilesUtils';
 
