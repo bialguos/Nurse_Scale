@@ -8,18 +8,22 @@ import DowntonList from './components/DowntonList';
 import DowntonForm from './components/DowntonForm';
 import GlasgowPediatricList from './components/GlasgowPediatricList';
 import GlasgowPediatricForm from './components/GlasgowPediatricForm';
+import NutritionalRiskList from './components/NutritionalRiskList';
+import NutritionalRiskForm from './components/NutritionalRiskForm';
 import type { BarthelRecord } from './types/barthel';
 import type { HumptyDumptyRecord } from './types/humptyDumpty';
 import { DowntonRecord } from './types/downton';
 import { GlasgowPediatricRecord } from './types/glasgowPediatric';
+import { NutritionalRiskRecord } from './types/nutritionalRisk';
 import { mockBarthelRecords } from './data/barthelData';
 import { mockHumptyDumptyRecords } from './data/humptyDumptyData';
 import { mockDowntonRecords } from './data/downtonData';
 import { mockGlasgowPediatricRecords } from './data/glasgowPediatricData';
+import { mockNutritionalRiskRecords } from './data/nutritionalRiskData';
 import { Tooltip } from 'react-tooltip';
 import LineChartIcon from './components/icons/LineChartIcon';
 
-type TabType = 'barthel' | 'humptyDumpty' | 'downton' | 'glasgowPediatric';
+type TabType = 'barthel' | 'humptyDumpty' | 'downton' | 'glasgowPediatric' | 'nutritionalRisk';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('barthel');
@@ -27,14 +31,17 @@ function App() {
   const [humptyDumptyRecords, setHumptyDumptyRecords] = useState<HumptyDumptyRecord[]>([]);
   const [downtonRecords, setDowntonRecords] = useState<DowntonRecord[]>([]);
   const [glasgowPediatricRecords, setGlasgowPediatricRecords] = useState<GlasgowPediatricRecord[]>([]);
+  const [nutritionalRiskRecords, setNutritionalRiskRecords] = useState<NutritionalRiskRecord[]>([]);
   const [editingBarthelRecord, setEditingBarthelRecord] = useState<BarthelRecord | undefined>(undefined);
   const [editingHumptyDumptyRecord, setEditingHumptyDumptyRecord] = useState<HumptyDumptyRecord | undefined>(undefined);
   const [editingDowntonRecord, setEditingDowntonRecord] = useState<DowntonRecord | undefined>(undefined);
   const [editingGlasgowPediatricRecord, setEditingGlasgowPediatricRecord] = useState<GlasgowPediatricRecord | undefined>(undefined);
+  const [editingNutritionalRiskRecord, setEditingNutritionalRiskRecord] = useState<NutritionalRiskRecord | undefined>(undefined);
   const [isBarthelFormVisible, setIsBarthelFormVisible] = useState(false);
   const [isHumptyDumptyFormVisible, setIsHumptyDumptyFormVisible] = useState(false);
   const [isDowntonFormVisible, setIsDowntonFormVisible] = useState(false);
   const [isGlasgowPediatricFormVisible, setIsGlasgowPediatricFormVisible] = useState(false);
+  const [isNutritionalRiskFormVisible, setIsNutritionalRiskFormVisible] = useState(false);
 
   // Cargar registros del localStorage al iniciar
   useEffect(() => {
@@ -77,6 +84,16 @@ function App() {
       setGlasgowPediatricRecords(mockGlasgowPediatricRecords);
       localStorage.setItem('glasgowPediatricRecords', JSON.stringify(mockGlasgowPediatricRecords));
     }
+
+    // Cargar registros de Valoración Nutricional
+    const savedNutritionalRiskRecords = localStorage.getItem('nutritionalRiskRecords');
+    if (savedNutritionalRiskRecords) {
+      setNutritionalRiskRecords(JSON.parse(savedNutritionalRiskRecords));
+    } else {
+      // Si no hay registros guardados, usar los de ejemplo
+      setNutritionalRiskRecords(mockNutritionalRiskRecords);
+      localStorage.setItem('nutritionalRiskRecords', JSON.stringify(mockNutritionalRiskRecords));
+    }
   }, []);
 
   // Guardar registros en localStorage cuando cambien
@@ -103,6 +120,12 @@ function App() {
       localStorage.setItem('glasgowPediatricRecords', JSON.stringify(glasgowPediatricRecords));
     }
   }, [glasgowPediatricRecords]);
+
+  useEffect(() => {
+    if (nutritionalRiskRecords.length > 0) {
+      localStorage.setItem('nutritionalRiskRecords', JSON.stringify(nutritionalRiskRecords));
+    }
+  }, [nutritionalRiskRecords]);
 
   // Manejadores para Barthel
   const handleEditBarthelRecord = (record: BarthelRecord) => {
@@ -216,6 +239,34 @@ function App() {
     setEditingGlasgowPediatricRecord(undefined);
   };
 
+  // Manejadores para Valoración Nutricional
+  const handleEditNutritionalRiskRecord = (record: NutritionalRiskRecord) => {
+    setEditingNutritionalRiskRecord(record);
+    setIsNutritionalRiskFormVisible(true);
+  };
+
+  const handleNewNutritionalRiskRecord = () => {
+    setEditingNutritionalRiskRecord(undefined);
+    setIsNutritionalRiskFormVisible(true);
+  };
+
+  const handleSaveNutritionalRiskRecord = (record: NutritionalRiskRecord) => {
+    if (editingNutritionalRiskRecord) {
+      // Actualizar registro existente
+      setNutritionalRiskRecords(records => records.map(r => r.id === record.id ? record : r));
+    } else {
+      // Añadir nuevo registro
+      setNutritionalRiskRecords(records => [record, ...records]);
+    }
+    setIsNutritionalRiskFormVisible(false);
+    setEditingNutritionalRiskRecord(undefined);
+  };
+
+  const handleCancelNutritionalRiskForm = () => {
+    setIsNutritionalRiskFormVisible(false);
+    setEditingNutritionalRiskRecord(undefined);
+  };
+
   return (
     <div className="app-container">
        <div className="bg-white p-4 border-b flex items-center">
@@ -282,6 +333,12 @@ function App() {
           onClick={() => setActiveTab('glasgowPediatric')}
         >
           Escala de Glasgow Pediátrica
+        </div>
+        <div
+          className={`tab ${activeTab === 'nutritionalRisk' ? 'active' : ''}`}
+          onClick={() => setActiveTab('nutritionalRisk')}
+        >
+          Valoración Nutricional Pediátrica
         </div>
       </div>
       
@@ -385,6 +442,32 @@ function App() {
                 initialRecord={editingGlasgowPediatricRecord}
                 onSave={handleSaveGlasgowPediatricRecord}
                 onCancel={handleCancelGlasgowPediatricForm}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Contenido de la pestaña Valoración Nutricional */}
+        <div className={`tab-content ${activeTab === 'nutritionalRisk' ? 'active' : ''}`}>
+          <div className="records-section">
+            <div className="section-header">
+              <h2>Historial de Registros de Valoración Nutricional Pediátrica (STAMP)</h2>
+              <button className="new-record-button" onClick={handleNewNutritionalRiskRecord}>
+                Nuevo Registro
+              </button>
+            </div>
+            <NutritionalRiskList
+              records={nutritionalRiskRecords}
+              onEditRecord={handleEditNutritionalRiskRecord}
+            />
+          </div>
+
+          {isNutritionalRiskFormVisible && (
+            <div className="form-section">
+              <NutritionalRiskForm
+                initialRecord={editingNutritionalRiskRecord}
+                onSave={handleSaveNutritionalRiskRecord}
+                onCancel={handleCancelNutritionalRiskForm}
               />
             </div>
           )}
