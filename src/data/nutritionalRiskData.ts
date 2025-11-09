@@ -25,10 +25,10 @@ export const nutritionalRiskItems: NutritionalRiskItem[] = [
     id: 3,
     name: "Peso y talla",
     options: [
-      { value: 3, label: "IMC por debajo del percentil 2 o pérdida de peso reciente >10%" },
-      { value: 2, label: "IMC por debajo del percentil 9 o pérdida de peso reciente 5-10%" },
-      { value: 1, label: "IMC por debajo del percentil 25 o pérdida de peso reciente 2-5%" },
-      { value: 0, label: "IMC por encima del percentil 25 o sin pérdida de peso reciente" }
+      { value: 3, label: "IMC por debajo del percentil 0.4 o pérdida de peso reciente >10%" },
+      { value: 2, label: "IMC por debajo del percentil 2 o pérdida de peso reciente 5-10%" },
+      { value: 1, label: "IMC por debajo del percentil 9 o pérdida de peso reciente 2-5%" },
+      { value: 0, label: "IMC por encima del percentil 9 o sin pérdida de peso reciente" }
     ]
   }
 ];
