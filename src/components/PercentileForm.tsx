@@ -1,23 +1,25 @@
-import { useState, useEffect } from 'react';
-import { PercentileRecord } from '../types/percentiles';
 import {
-  generateId,
+  ageToMonths,
   calculateRecordPercentiles,
   formatAge,
+  generateId,
   getPercentileColor,
   getPercentileDescription,
   getPercentileDifferenceInterpretation,
-  ageToMonths,
 } from '../utils/percentilesUtils';
+import { useEffect, useState } from 'react';
+
 import PercentileChart from './PercentileChart';
+import { PercentileRecord } from '../types/percentiles';
 
 interface PercentileFormProps {
   initialRecord?: PercentileRecord;
+  historicalRecords?: PercentileRecord[];
   onSave: (record: PercentileRecord) => void;
   onCancel: () => void;
 }
 
-const PercentileForm = ({ initialRecord, onSave, onCancel }: PercentileFormProps) => {
+const PercentileForm = ({ initialRecord, historicalRecords, onSave, onCancel }: PercentileFormProps) => {
   const [record, setRecord] = useState<Partial<PercentileRecord>>({
     id: '',
     date: new Date().toISOString(),
@@ -59,11 +61,21 @@ const PercentileForm = ({ initialRecord, onSave, onCancel }: PercentileFormProps
         record.gender
       );
 
-      setRecord((prev) => ({
-        ...prev,
-        patientAge: ageToMonths(prev.patientAgeYears || 0, prev.patientAgeMonths || 0),
-        ...percentiles,
-      }));
+      const newPatientAge = ageToMonths(record.patientAgeYears || 0, record.patientAgeMonths || 0);
+
+      // Solo actualizar si los valores han cambiado
+      if (
+        record.patientAge !== newPatientAge ||
+        record.weightPercentile !== percentiles.weightPercentile ||
+        record.heightPercentile !== percentiles.heightPercentile ||
+        record.percentileDifference !== percentiles.percentileDifference
+      ) {
+        setRecord((prev) => ({
+          ...prev,
+          patientAge: newPatientAge,
+          ...percentiles,
+        }));
+      }
     }
   }, [
     record.patientAgeYears,
@@ -71,6 +83,10 @@ const PercentileForm = ({ initialRecord, onSave, onCancel }: PercentileFormProps
     record.weight,
     record.height,
     record.gender,
+    record.patientAge,
+    record.weightPercentile,
+    record.heightPercentile,
+    record.percentileDifference,
   ]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -326,6 +342,9 @@ const PercentileForm = ({ initialRecord, onSave, onCancel }: PercentileFormProps
           ageInMonths={record.patientAge || 0}
           weight={record.weight || 0}
           height={record.height || 0}
+          historicalRecords={[
+            ...(historicalRecords?.filter(r => r.id !== record.id && r.gender === record.gender) || []),
+          ]}
         />
       )}
 

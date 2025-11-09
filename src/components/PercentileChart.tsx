@@ -5,20 +5,24 @@ import {
   Line,
   ReferenceDot,
   ResponsiveContainer,
+  Scatter,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
 import { generateChartData, monthsToAge } from '../utils/percentilesUtils';
+import { PercentileRecord } from '../types/percentiles';
 
 interface PercentileChartProps {
   gender: 'male' | 'female';
   ageInMonths: number;
   weight: number;
   height: number;
+  historicalRecords?: PercentileRecord[];
+  showAllGenders?: boolean; // Nueva prop para mostrar todos los géneros
 }
 
-const PercentileChart = ({ gender, ageInMonths, weight, height }: PercentileChartProps) => {
+const PercentileChart = ({ gender, ageInMonths, weight, height, historicalRecords, showAllGenders = false }: PercentileChartProps) => {
   // Determinar rango de edad para mostrar en la gráfica
   const getAgeRange = (age: number): { min: number; max: number } => {
     if (age <= 24) return { min: 0, max: 24 }; // 0-2 años
@@ -27,9 +31,22 @@ const PercentileChart = ({ gender, ageInMonths, weight, height }: PercentileChar
     return { min: 120, max: 216 }; // 10-18 años
   };
 
-  const ageRange = getAgeRange(ageInMonths);
+  // Determinar rango de edad considerando todos los registros históricos
+  const allAges = historicalRecords ? [ageInMonths, ...historicalRecords.map(r => r.patientAge)] : [ageInMonths];
+  const maxAge = Math.max(...allAges);
+  const ageRange = getAgeRange(maxAge);
   const weightData = generateChartData('weight', gender, ageRange.min, ageRange.max);
   const heightData = generateChartData('height', gender, ageRange.min, ageRange.max);
+
+  // Calcular dominio del eje Y para peso
+  const weightValues = weightData.flatMap(d => [d.P3, d.P10, d.P25, d.P50, d.P75, d.P90, d.P97]);
+  const minWeight = Math.floor(Math.min(...weightValues) * 0.9);
+  const maxWeight = Math.ceil(Math.max(...weightValues) * 1.1);
+
+  // Calcular dominio del eje Y para talla
+  const heightValues = heightData.flatMap(d => [d.P3, d.P10, d.P25, d.P50, d.P75, d.P90, d.P97]);
+  const minHeight = Math.floor(Math.min(...heightValues) * 0.95);
+  const maxHeight = Math.ceil(Math.max(...heightValues) * 1.05);
 
   // Formatear edad en el eje X
   const formatXAxis = (value: number) => {
@@ -39,13 +56,49 @@ const PercentileChart = ({ gender, ageInMonths, weight, height }: PercentileChar
     return `${years}a ${months}m`;
   };
 
-  // Punto actual del paciente
-  const patientWeightPoint = { age: ageInMonths, value: weight };
-  const patientHeightPoint = { age: ageInMonths, value: height };
+  // Puntos históricos (filtrados por género si no showAllGenders)
+  const historicalWeightPoints = historicalRecords
+    ? historicalRecords
+        .filter(record => (showAllGenders || record.gender === gender) && record.patientAge > 0)
+        .map(record => ({
+          age: record.patientAge,
+          weight: record.weight,
+          date: record.date,
+          patientName: record.patientName,
+          id: record.id,
+          gender: record.gender
+        }))
+    : [];
+
+  const historicalHeightPoints = historicalRecords
+    ? historicalRecords
+        .filter(record => (showAllGenders || record.gender === gender) && record.patientAge > 0)
+        .map(record => ({
+          age: record.patientAge,
+          height: record.height,
+          date: record.date,
+          patientName: record.patientName,
+          id: record.id,
+          gender: record.gender
+        }))
+    : [];
+
 
   return (
     <div className="barthel-scale-info" style={{ marginTop: '20px' }}>
-      <h3>Gráficas de Percentiles</h3>
+      <h3>Gráficas de Percentiles {historicalRecords ? 'con Historial' : ''}</h3>
+
+      {/* Debug info */}
+      {historicalRecords && historicalRecords.length > 0 && (
+        <div style={{ padding: '10px', backgroundColor: '#f0f0f0', marginBottom: '10px', fontSize: '0.9em' }}>
+          <strong>Registros históricos ({gender}):</strong> {historicalWeightPoints.length} puntos
+          {historicalWeightPoints.map((point, index) => (
+            <div key={index}>
+              • Edad: {point.age} meses, Peso: {point.value} kg, Talla: {historicalHeightPoints[index]?.value} cm
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Gráfica de Peso */}
       <div style={{ marginTop: '20px', marginBottom: '40px' }}>
@@ -60,11 +113,14 @@ const PercentileChart = ({ gender, ageInMonths, weight, height }: PercentileChar
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <XAxis
               dataKey="age"
+              type="number"
+              domain={[ageRange.min, ageRange.max]}
               label={{ value: 'Edad', position: 'insideBottom', offset: -10 }}
               tickFormatter={formatXAxis}
               stroke="#666"
             />
             <YAxis
+              domain={[minWeight, maxWeight]}
               label={{ value: 'Peso (kg)', angle: -90, position: 'insideLeft' }}
               stroke="#666"
             />
@@ -137,22 +193,25 @@ const PercentileChart = ({ gender, ageInMonths, weight, height }: PercentileChar
               name="P97"
             />
 
-            {/* Punto del paciente */}
-            <ReferenceDot
-              x={patientWeightPoint.age}
-              y={patientWeightPoint.value}
-              r={8}
-              fill="#3498db"
-              stroke="#2c3e50"
-              strokeWidth={2}
-              label={{
-                value: `Paciente: ${weight} kg`,
-                position: 'top',
-                fill: '#2c3e50',
-                fontSize: 12,
-                fontWeight: 'bold',
-              }}
+            {/* Puntos históricos usando Scatter */}
+            <Scatter
+              name="Registros históricos"
+              data={historicalWeightPoints}
+              fill="#e74c3c"
+              shape="circle"
+              dataKey="weight"
             />
+
+            {/* Punto del paciente actual (solo si hay datos válidos) */}
+            {ageInMonths > 0 && weight > 0 && height > 0 && (
+              <Scatter
+                name="Paciente actual"
+                data={[{ age: ageInMonths, weight: weight }]}
+                fill="#3498db"
+                shape="circle"
+                dataKey="weight"
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -170,11 +229,14 @@ const PercentileChart = ({ gender, ageInMonths, weight, height }: PercentileChar
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <XAxis
               dataKey="age"
+              type="number"
+              domain={[ageRange.min, ageRange.max]}
               label={{ value: 'Edad', position: 'insideBottom', offset: -10 }}
               tickFormatter={formatXAxis}
               stroke="#666"
             />
             <YAxis
+              domain={[minHeight, maxHeight]}
               label={{ value: 'Talla (cm)', angle: -90, position: 'insideLeft' }}
               stroke="#666"
             />
@@ -247,22 +309,25 @@ const PercentileChart = ({ gender, ageInMonths, weight, height }: PercentileChar
               name="P97"
             />
 
-            {/* Punto del paciente */}
-            <ReferenceDot
-              x={patientHeightPoint.age}
-              y={patientHeightPoint.value}
-              r={8}
-              fill="#3498db"
-              stroke="#2c3e50"
-              strokeWidth={2}
-              label={{
-                value: `Paciente: ${height} cm`,
-                position: 'top',
-                fill: '#2c3e50',
-                fontSize: 12,
-                fontWeight: 'bold',
-              }}
+            {/* Puntos históricos usando Scatter */}
+            <Scatter
+              name="Registros históricos"
+              data={historicalHeightPoints}
+              fill="#e74c3c"
+              shape="circle"
+              dataKey="height"
             />
+
+            {/* Punto del paciente actual (solo si hay datos válidos) */}
+            {ageInMonths > 0 && weight > 0 && height > 0 && (
+              <Scatter
+                name="Paciente actual"
+                data={[{ age: ageInMonths, height: height }]}
+                fill="#3498db"
+                shape="circle"
+                dataKey="height"
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -286,9 +351,19 @@ const PercentileChart = ({ gender, ageInMonths, weight, height }: PercentileChar
             <strong>P75-P90:</strong> <span style={{ color: '#f97316' }}>Alto normal</span> -
             Seguimiento recomendado
           </p>
-          <p>
+          <p style={{ marginBottom: '8px' }}>
             <strong>P90-P97:</strong> <span style={{ color: '#ef4444' }}>Alto</span> - Puede requerir
             evaluación nutricional
+          </p>
+          <hr style={{ margin: '10px 0', borderColor: '#ddd' }} />
+          <p style={{ marginTop: '10px' }}>
+            <strong>Leyenda de puntos:</strong>
+          </p>
+          <p style={{ marginBottom: '4px' }}>
+            • <span style={{ color: '#3498db', fontWeight: 'bold' }}>Punto azul grande:</span> Paciente actual
+          </p>
+          <p>
+            • <span style={{ color: '#e74c3c', fontWeight: 'bold' }}>Puntos rojos:</span> Registros históricos
           </p>
         </div>
       </div>

@@ -18,6 +18,7 @@ import LineChartIcon from './components/icons/LineChartIcon';
 import NutritionalRiskForm from './components/NutritionalRiskForm';
 import NutritionalRiskList from './components/NutritionalRiskList';
 import { NutritionalRiskRecord } from './types/nutritionalRisk';
+import PercentileChart from './components/PercentileChart';
 import PercentileForm from './components/PercentileForm';
 import PercentileList from './components/PercentileList';
 import { PercentileRecord } from './types/percentiles';
@@ -547,10 +548,42 @@ function App() {
             />
           </div>
 
+          {/* Gráficas generales separadas por género */}
+          {percentileRecords.length > 0 && !isPercentileFormVisible && (
+            <>
+              {/* Gráfica para niños */}
+              {percentileRecords.some(r => r.gender === 'male') && (
+                <div className="form-section">
+                  <PercentileChart
+                    gender="male"
+                    ageInMonths={0}
+                    weight={0}
+                    height={0}
+                    historicalRecords={percentileRecords.filter(r => r.gender === 'male')}
+                  />
+                </div>
+              )}
+
+              {/* Gráfica para niñas */}
+              {percentileRecords.some(r => r.gender === 'female') && (
+                <div className="form-section">
+                  <PercentileChart
+                    gender="female"
+                    ageInMonths={0}
+                    weight={0}
+                    height={0}
+                    historicalRecords={percentileRecords.filter(r => r.gender === 'female')}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
           {isPercentileFormVisible && (
             <div className="form-section">
               <PercentileForm
                 initialRecord={editingPercentileRecord}
+                historicalRecords={percentileRecords}
                 onSave={handleSavePercentileRecord}
                 onCancel={handleCancelPercentileForm}
               />
