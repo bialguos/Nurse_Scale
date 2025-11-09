@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { NutritionalRiskItem, NutritionalRiskRecord } from '../types/nutritionalRisk';
 import { nutritionalRiskItems } from '../data/nutritionalRiskData';
 import { calculateTotalScore, generateId, getNutritionalRiskResultText, getNutritionalRiskResultColor, nutritionalRiskScoreDescriptions } from '../utils/nutritionalRiskUtils';
+import PercentileCalculator from './PercentileCalculator';
+import { BMICalculatorResult } from '../types/percentile';
 
 interface NutritionalRiskFormProps {
   initialRecord?: NutritionalRiskRecord;
@@ -30,6 +32,13 @@ const NutritionalRiskForm = ({ initialRecord, onSave, onCancel }: NutritionalRis
   const [errors, setErrors] = useState({
     professional: false
   });
+
+  const handlePercentileResultChange = (result: BMICalculatorResult | null) => {
+    // Si hay un resultado y tiene un valor nutricional, actualizar el item de "Peso y talla" (id: 3)
+    if (result && result.nutritionalRiskValue !== undefined) {
+      handleItemChange(3, result.nutritionalRiskValue);
+    }
+  };
 
   // Resetear el formulario cuando cambia initialRecord (incluso a undefined)
   useEffect(() => {
@@ -153,6 +162,8 @@ const NutritionalRiskForm = ({ initialRecord, onSave, onCancel }: NutritionalRis
           </div>
         </div>
       </div>
+
+      <PercentileCalculator onResultChange={handlePercentileResultChange} />
 
       <div className="barthel-items">
         {nutritionalRiskItems.map(renderNutritionalRiskItem)}
