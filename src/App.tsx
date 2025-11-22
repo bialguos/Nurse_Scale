@@ -28,6 +28,9 @@ import { BradenRecord } from './types/bradenQ';
 import PediatricFallRiskForm from './components/PediatricFallRiskForm';
 import PediatricFallRiskList from './components/PediatricFallRiskList';
 import { PediatricFallRiskRecord } from './types/pediatricFallRisk';
+import PediatricPainForm from './components/PediatricPainForm';
+import PediatricPainList from './components/PediatricPainList';
+import { PediatricPainRecord } from './types/pediatricPain';
 import { Tooltip } from 'react-tooltip';
 import { mockBarthelRecords } from './data/barthelData';
 import { mockDowntonRecords } from './data/downtonData';
@@ -37,7 +40,7 @@ import { mockNutritionalRiskRecords } from './data/nutritionalRiskData';
 import { mockPercentileRecords } from './data/percentilesData';
 import { mockBradenRecords } from './data/bradenQData';
 
-type TabType = 'barthel' | 'humptyDumpty' | 'downton' | 'glasgowPediatric' | 'nutritionalRisk' | 'percentiles' | 'bradenQ' | 'pediatricFallRisk';
+type TabType = 'barthel' | 'humptyDumpty' | 'downton' | 'glasgowPediatric' | 'nutritionalRisk' | 'percentiles' | 'bradenQ' | 'pediatricFallRisk' | 'pediatricPain';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('barthel');
@@ -49,6 +52,7 @@ function App() {
   const [percentileRecords, setPercentileRecords] = useState<PercentileRecord[]>([]);
   const [bradenRecords, setBradenRecords] = useState<BradenRecord[]>([]);
   const [pediatricFallRiskRecords, setPediatricFallRiskRecords] = useState<PediatricFallRiskRecord[]>([]);
+  const [pediatricPainRecords, setPediatricPainRecords] = useState<PediatricPainRecord[]>([]);
   const [editingBarthelRecord, setEditingBarthelRecord] = useState<BarthelRecord | undefined>(undefined);
   const [editingHumptyDumptyRecord, setEditingHumptyDumptyRecord] = useState<HumptyDumptyRecord | undefined>(undefined);
   const [editingDowntonRecord, setEditingDowntonRecord] = useState<DowntonRecord | undefined>(undefined);
@@ -57,6 +61,7 @@ function App() {
   const [editingPercentileRecord, setEditingPercentileRecord] = useState<PercentileRecord | undefined>(undefined);
   const [editingBradenRecord, setEditingBradenRecord] = useState<BradenRecord | undefined>(undefined);
   const [editingPediatricFallRiskRecord, setEditingPediatricFallRiskRecord] = useState<PediatricFallRiskRecord | undefined>(undefined);
+  const [editingPediatricPainRecord, setEditingPediatricPainRecord] = useState<PediatricPainRecord | undefined>(undefined);
   const [isBarthelFormVisible, setIsBarthelFormVisible] = useState(false);
   const [isHumptyDumptyFormVisible, setIsHumptyDumptyFormVisible] = useState(false);
   const [isDowntonFormVisible, setIsDowntonFormVisible] = useState(false);
@@ -65,6 +70,7 @@ function App() {
   const [isPercentileFormVisible, setIsPercentileFormVisible] = useState(false);
   const [isBradenFormVisible, setIsBradenFormVisible] = useState(false);
   const [isPediatricFallRiskFormVisible, setIsPediatricFallRiskFormVisible] = useState(false);
+  const [isPediatricPainFormVisible, setIsPediatricPainFormVisible] = useState(false);
 
   // Cargar registros del localStorage al iniciar
   useEffect(() => {
@@ -143,6 +149,12 @@ function App() {
     if (savedPediatricFallRiskRecords) {
       setPediatricFallRiskRecords(JSON.parse(savedPediatricFallRiskRecords));
     }
+
+    // Cargar registros de Dolor Pediátrico
+    const savedPediatricPainRecords = localStorage.getItem('pediatricPainRecords');
+    if (savedPediatricPainRecords) {
+      setPediatricPainRecords(JSON.parse(savedPediatricPainRecords));
+    }
   }, []);
 
   // Guardar registros en localStorage cuando cambien
@@ -193,6 +205,12 @@ function App() {
       localStorage.setItem('pediatricFallRiskRecords', JSON.stringify(pediatricFallRiskRecords));
     }
   }, [pediatricFallRiskRecords]);
+
+  useEffect(() => {
+    if (pediatricPainRecords.length > 0) {
+      localStorage.setItem('pediatricPainRecords', JSON.stringify(pediatricPainRecords));
+    }
+  }, [pediatricPainRecords]);
 
   // Manejadores para Barthel
   const handleEditBarthelRecord = (record: BarthelRecord) => {
@@ -426,6 +444,38 @@ function App() {
     setPediatricFallRiskRecords(records => records.filter(r => r.id !== id));
   };
 
+  // Manejadores para Dolor Pediátrico
+  const handleEditPediatricPainRecord = (record: PediatricPainRecord) => {
+    setEditingPediatricPainRecord(record);
+    setIsPediatricPainFormVisible(true);
+  };
+
+  const handleNewPediatricPainRecord = () => {
+    setEditingPediatricPainRecord(undefined);
+    setIsPediatricPainFormVisible(true);
+  };
+
+  const handleSavePediatricPainRecord = (record: PediatricPainRecord) => {
+    if (editingPediatricPainRecord) {
+      // Actualizar registro existente
+      setPediatricPainRecords(records => records.map(r => r.id === record.id ? record : r));
+    } else {
+      // Añadir nuevo registro
+      setPediatricPainRecords(records => [record, ...records]);
+    }
+    setIsPediatricPainFormVisible(false);
+    setEditingPediatricPainRecord(undefined);
+  };
+
+  const handleCancelPediatricPainForm = () => {
+    setIsPediatricPainFormVisible(false);
+    setEditingPediatricPainRecord(undefined);
+  };
+
+  const handleDeletePediatricPainRecord = (id: string) => {
+    setPediatricPainRecords(records => records.filter(r => r.id !== id));
+  };
+
   return (
     <div className="app-container">
        <div className="bg-white p-4 border-b flex items-center">
@@ -516,6 +566,12 @@ function App() {
           onClick={() => setActiveTab('pediatricFallRisk')}
         >
           Riesgo Caídas Pediátrico
+        </div>
+        <div
+          className={`tab ${activeTab === 'pediatricPain' ? 'active' : ''}`}
+          onClick={() => setActiveTab('pediatricPain')}
+        >
+          Dolor Pediátrico
         </div>
       </div>
       
@@ -757,6 +813,33 @@ function App() {
                 initialRecord={editingPediatricFallRiskRecord}
                 onSave={handleSavePediatricFallRiskRecord}
                 onCancel={handleCancelPediatricFallRiskForm}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Contenido de la pestaña Dolor Pediátrico */}
+        <div className={`tab-content ${activeTab === 'pediatricPain' ? 'active' : ''}`}>
+          <div className="records-section">
+            <div className="section-header">
+              <h2>Historial de Valoraciones del Dolor Pediátrico</h2>
+              <button className="new-record-button" onClick={handleNewPediatricPainRecord}>
+                Nueva Valoración
+              </button>
+            </div>
+            <PediatricPainList
+              records={pediatricPainRecords}
+              onEdit={handleEditPediatricPainRecord}
+              onDelete={handleDeletePediatricPainRecord}
+            />
+          </div>
+
+          {isPediatricPainFormVisible && (
+            <div className="form-section">
+              <PediatricPainForm
+                initialRecord={editingPediatricPainRecord}
+                onSave={handleSavePediatricPainRecord}
+                onCancel={handleCancelPediatricPainForm}
               />
             </div>
           )}
