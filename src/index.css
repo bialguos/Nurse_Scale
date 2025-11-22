@@ -58,6 +58,61 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Estilos globales para campos de formulario */
+input,
+select,
+textarea {
+  background-color: white;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+input[type="number"] {
+  background-color: white;
+  color: #333;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: #3498db;
+  background-color: white;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #3498db;
+  cursor: pointer;
+}
+
+input[type="radio"] {
+  border-radius: 50%;
+}
+
+input[type="checkbox"] {
+  border-radius: 3px;
+}
+
+input[type="radio"]:checked {
+  background-color: white;
+  border: 5px solid #3498db;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #3498db;
+  position: relative;
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  color: white;
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

@@ -22,6 +22,9 @@ import PercentileChart from './components/PercentileChart';
 import PercentileForm from './components/PercentileForm';
 import PercentileList from './components/PercentileList';
 import { PercentileRecord } from './types/percentiles';
+import BradenQForm from './components/BradenQForm';
+import BradenQList from './components/BradenQList';
+import { BradenRecord } from './types/bradenQ';
 import { Tooltip } from 'react-tooltip';
 import { mockBarthelRecords } from './data/barthelData';
 import { mockDowntonRecords } from './data/downtonData';
@@ -29,8 +32,9 @@ import { mockGlasgowPediatricRecords } from './data/glasgowPediatricData';
 import { mockHumptyDumptyRecords } from './data/humptyDumptyData';
 import { mockNutritionalRiskRecords } from './data/nutritionalRiskData';
 import { mockPercentileRecords } from './data/percentilesData';
+import { mockBradenRecords } from './data/bradenQData';
 
-type TabType = 'barthel' | 'humptyDumpty' | 'downton' | 'glasgowPediatric' | 'nutritionalRisk' | 'percentiles';
+type TabType = 'barthel' | 'humptyDumpty' | 'downton' | 'glasgowPediatric' | 'nutritionalRisk' | 'percentiles' | 'bradenQ';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('barthel');
@@ -40,18 +44,21 @@ function App() {
   const [glasgowPediatricRecords, setGlasgowPediatricRecords] = useState<GlasgowPediatricRecord[]>([]);
   const [nutritionalRiskRecords, setNutritionalRiskRecords] = useState<NutritionalRiskRecord[]>([]);
   const [percentileRecords, setPercentileRecords] = useState<PercentileRecord[]>([]);
+  const [bradenRecords, setBradenRecords] = useState<BradenRecord[]>([]);
   const [editingBarthelRecord, setEditingBarthelRecord] = useState<BarthelRecord | undefined>(undefined);
   const [editingHumptyDumptyRecord, setEditingHumptyDumptyRecord] = useState<HumptyDumptyRecord | undefined>(undefined);
   const [editingDowntonRecord, setEditingDowntonRecord] = useState<DowntonRecord | undefined>(undefined);
   const [editingGlasgowPediatricRecord, setEditingGlasgowPediatricRecord] = useState<GlasgowPediatricRecord | undefined>(undefined);
   const [editingNutritionalRiskRecord, setEditingNutritionalRiskRecord] = useState<NutritionalRiskRecord | undefined>(undefined);
   const [editingPercentileRecord, setEditingPercentileRecord] = useState<PercentileRecord | undefined>(undefined);
+  const [editingBradenRecord, setEditingBradenRecord] = useState<BradenRecord | undefined>(undefined);
   const [isBarthelFormVisible, setIsBarthelFormVisible] = useState(false);
   const [isHumptyDumptyFormVisible, setIsHumptyDumptyFormVisible] = useState(false);
   const [isDowntonFormVisible, setIsDowntonFormVisible] = useState(false);
   const [isGlasgowPediatricFormVisible, setIsGlasgowPediatricFormVisible] = useState(false);
   const [isNutritionalRiskFormVisible, setIsNutritionalRiskFormVisible] = useState(false);
   const [isPercentileFormVisible, setIsPercentileFormVisible] = useState(false);
+  const [isBradenFormVisible, setIsBradenFormVisible] = useState(false);
 
   // Cargar registros del localStorage al iniciar
   useEffect(() => {
@@ -114,6 +121,16 @@ function App() {
       setPercentileRecords(mockPercentileRecords);
       localStorage.setItem('percentileRecords', JSON.stringify(mockPercentileRecords));
     }
+
+    // Cargar registros de Braden Q
+    const savedBradenRecords = localStorage.getItem('bradenRecords');
+    if (savedBradenRecords) {
+      setBradenRecords(JSON.parse(savedBradenRecords));
+    } else {
+      // Si no hay registros guardados, usar los de ejemplo
+      setBradenRecords(mockBradenRecords);
+      localStorage.setItem('bradenRecords', JSON.stringify(mockBradenRecords));
+    }
   }, []);
 
   // Guardar registros en localStorage cuando cambien
@@ -152,6 +169,12 @@ function App() {
       localStorage.setItem('percentileRecords', JSON.stringify(percentileRecords));
     }
   }, [percentileRecords]);
+
+  useEffect(() => {
+    if (bradenRecords.length > 0) {
+      localStorage.setItem('bradenRecords', JSON.stringify(bradenRecords));
+    }
+  }, [bradenRecords]);
 
   // Manejadores para Barthel
   const handleEditBarthelRecord = (record: BarthelRecord) => {
@@ -321,6 +344,38 @@ function App() {
     setEditingPercentileRecord(undefined);
   };
 
+  // Manejadores para Braden Q
+  const handleEditBradenRecord = (record: BradenRecord) => {
+    setEditingBradenRecord(record);
+    setIsBradenFormVisible(true);
+  };
+
+  const handleNewBradenRecord = () => {
+    setEditingBradenRecord(undefined);
+    setIsBradenFormVisible(true);
+  };
+
+  const handleSaveBradenRecord = (record: BradenRecord) => {
+    if (editingBradenRecord) {
+      // Actualizar registro existente
+      setBradenRecords(records => records.map(r => r.id === record.id ? record : r));
+    } else {
+      // Añadir nuevo registro
+      setBradenRecords(records => [record, ...records]);
+    }
+    setIsBradenFormVisible(false);
+    setEditingBradenRecord(undefined);
+  };
+
+  const handleCancelBradenForm = () => {
+    setIsBradenFormVisible(false);
+    setEditingBradenRecord(undefined);
+  };
+
+  const handleDeleteBradenRecord = (id: string) => {
+    setBradenRecords(records => records.filter(r => r.id !== id));
+  };
+
   return (
     <div className="app-container">
        <div className="bg-white p-4 border-b flex items-center">
@@ -399,6 +454,12 @@ function App() {
           onClick={() => setActiveTab('percentiles')}
         >
           Percentiles Pediátricos
+        </div>
+        <div
+          className={`tab ${activeTab === 'bradenQ' ? 'active' : ''}`}
+          onClick={() => setActiveTab('bradenQ')}
+        >
+          Valoración Riesgo UPP (Braden)
         </div>
       </div>
       
@@ -586,6 +647,33 @@ function App() {
                 historicalRecords={percentileRecords}
                 onSave={handleSavePercentileRecord}
                 onCancel={handleCancelPercentileForm}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Contenido de la pestaña Braden Q */}
+        <div className={`tab-content ${activeTab === 'bradenQ' ? 'active' : ''}`}>
+          <div className="records-section">
+            <div className="section-header">
+              <h2>Historial de Valoraciones de Riesgo de UPP (Escalas Braden Q y Braden-Bergstrom)</h2>
+              <button className="new-record-button" onClick={handleNewBradenRecord}>
+                Nueva Valoración
+              </button>
+            </div>
+            <BradenQList
+              records={bradenRecords}
+              onEdit={handleEditBradenRecord}
+              onDelete={handleDeleteBradenRecord}
+            />
+          </div>
+
+          {isBradenFormVisible && (
+            <div className="form-section">
+              <BradenQForm
+                initialRecord={editingBradenRecord}
+                onSave={handleSaveBradenRecord}
+                onCancel={handleCancelBradenForm}
               />
             </div>
           )}
