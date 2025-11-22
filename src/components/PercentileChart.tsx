@@ -3,7 +3,6 @@ import {
   ComposedChart,
   Legend,
   Line,
-  ReferenceDot,
   ResponsiveContainer,
   Scatter,
   Tooltip,
@@ -94,7 +93,7 @@ const PercentileChart = ({ gender, ageInMonths, weight, height, historicalRecord
           <strong>Registros históricos ({gender}):</strong> {historicalWeightPoints.length} puntos
           {historicalWeightPoints.map((point, index) => (
             <div key={index}>
-              • Edad: {point.age} meses, Peso: {point.value} kg, Talla: {historicalHeightPoints[index]?.value} cm
+              • Edad: {point.age} meses, Peso: {point.weight} kg, Talla: {historicalHeightPoints[index]?.height} cm
             </div>
           ))}
         </div>

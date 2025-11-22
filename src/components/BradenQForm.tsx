@@ -282,7 +282,7 @@ const BradenQForm = ({ initialRecord, onSave, onCancel }: BradenQFormProps) => {
 
       <div className="barthel-items">
         {categories.map((category) => (
-          <div key={category.field} className="barthel-item">
+          <div key={String(category.field)} className="barthel-item">
             <h3>{category.name}</h3>
             <div className="options">
               {category.options.map((option) => (
@@ -301,7 +301,7 @@ const BradenQForm = ({ initialRecord, onSave, onCancel }: BradenQFormProps) => {
                   <div className="option-header">
                     <input
                       type="radio"
-                      name={category.field}
+                      name={String(category.field)}
                       value={option.value}
                       checked={record[category.field as keyof BradenRecord] === option.value}
                       onChange={() => {}}
@@ -317,7 +317,7 @@ const BradenQForm = ({ initialRecord, onSave, onCancel }: BradenQFormProps) => {
         ))}
       </div>
 
-      {record.totalScore > 0 && (
+      {(record.totalScore ?? 0) > 0 && (
         <div className="barthel-scale-info" style={{ marginTop: '20px' }}>
           <h3>Resultado de la Evaluación</h3>
           <div

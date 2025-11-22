@@ -37,6 +37,6 @@ export interface BradenQOption {
 
 export interface BradenQCategory {
   name: string;
-  field: keyof Omit<BradenQRecord, 'id' | 'date' | 'professional' | 'patientName' | 'patientAge' | 'totalScore' | 'riskLevel'>;
+  field: keyof Omit<BradenRecord, 'id' | 'date' | 'professional' | 'patientName' | 'patientAge' | 'totalScore' | 'riskLevel'>;
   options: BradenQOption[];
 }
